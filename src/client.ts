@@ -1,8 +1,8 @@
 import * as discord from "discord.js";
 import { CommandDispatcher } from "./dispatcher";
-import { GearManager } from "./gear-manager";
+import { CommandManager } from "./command-manager";
 
-export interface ClientOptions extends discord.ClientOptions {
+export interface ClientOptions {
     /** Character or string that prefaces each command */
     commandPrefix?: string;
     /** Whether the bot should respond to an unknown command */
@@ -13,21 +13,24 @@ export interface ClientOptions extends discord.ClientOptions {
 
 export class CommandClient extends discord.Client {
     dispatcher: CommandDispatcher;
-    gearManager: GearManager;
-    
-    constructor(options: ClientOptions = {}) {
+    commandManager: CommandManager;
+    options: Required<ClientOptions> & discord.ClientOptions;
+
+    constructor(options: ClientOptions & discord.ClientOptions = {}) {
         if (options.commandPrefix === undefined) { options.commandPrefix = "!"; }
         if (options.unknownCommandResponse === undefined) { options.unknownCommandResponse = false; }
-
+        if (options.owner === undefined) { options.owner = ""; }
+        
         super(options);
 
-        this.gearManager = new GearManager();
-        this.dispatcher = new CommandDispatcher(this.gearManager);
+        this.options = options as Required<ClientOptions>;
+        this.commandManager = new CommandManager();
+        this.dispatcher = new CommandDispatcher(this.commandManager);
 
         this.on("message", msg => this.dispatcher.handleMessage(this, msg));
     }
 
     addGear(gear: any) {
-        this.gearManager.addGear(gear);
+        this.commandManager.addGear(gear);
     }
 }

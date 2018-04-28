@@ -1,12 +1,8 @@
 type CommandMap = Map<string, Command>;
 
-interface Gear {
-    
-}
-
 interface CommandOptions {
     /** Name of command - defaults to function name */
-    name?: string;
+    name: string;
     /** If set, command is not invokable */
     disabled?: boolean;
 }
@@ -20,6 +16,14 @@ interface CommandParameter {
     optional: boolean;
 }
 
+interface Command {
+    kind: "command";
+    name: string;
+    disabled: boolean;
+    params: CommandParameter[];
+    gear: any;
+}
+
 interface CommandGroup {
     kind: "group";
     /** Name of command */
@@ -27,14 +31,7 @@ interface CommandGroup {
     /** If set, command is not invokable */
     disabled: boolean;
 
-    className: string;
     subCommands: CommandMap;
-}
 
-interface Command {
-    kind: "command";
-    name: string;
-    disabled: boolean;
-    className: string;
-    params: CommandParameter[];
+    gear: any;
 }

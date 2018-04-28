@@ -1,52 +1,47 @@
 import * as discord from "discord.js";
 
-type Decorator = CommandDecorator | CheckDecorator | RestDecorator | OptionalDecorator;
-
 /** Maps from target (class) to key (method) to decorator */
 type DecoratorMap = Map<any, Map<string, Decorator[]>>
 const decoratorMap: DecoratorMap = new Map();
 
-interface CommandDecorator {
-    kind: "command";
-    options: CommandOptions;
-
-    target: any;
-    key: string;
+class Decorator {
+    constructor(public target: any, public key: string) { }
 }
 
-interface CheckDecorator {
-    kind: "check";
-
-    check: { type: "owner" } | {
-        type: "custom",
-        checkFn: (user: discord.User) => boolean;
-    };
-
-    target: any;
-    key: string;
+export class CommandDecorator extends Decorator {
+    constructor(target: any, key: string, public options: CommandOptions) {
+        super(target, key);
+    }
 }
 
-interface RestDecorator {
-    kind: "rest";
-    index: number;
+type CheckType = { type: "owner" } | {
+    type: "custom",
+    checkFn: (user: discord.User) => boolean;
+};
 
-    target: any;
-    key: string;
+export class CheckDecorator extends Decorator {
+    constructor(target: any, key: string, public check: CheckType) {
+        super(target, key);
+    }
 }
 
-interface OptionalDecorator {
-    kind: "optional";
-    index: number;
+export class RestDecorator extends Decorator {
+    constructor(target: any, key: string, public index: number) {
+        super(target, key);
+    }
+}
 
-    target: any;
-    key: string;
+export class OptionalDecorator extends Decorator {
+    constructor(target: any, key: string, public index: number) {
+        super(target, key);
+    }
 }
 
 /**
  * Adds a decorator to the decorator map. 
  * @param decorator Decorator to add.
  */
-function add(decorator: Decorator) {
+function addDecorator(decorator: Decorator) {
     if (!decoratorMap.has(decorator.target)) {
         decoratorMap.set(decorator.target, new Map());
     }
@@ -64,11 +59,19 @@ function add(decorator: Decorator) {
  * @param target Generally a class.
  * @param key Key in target that is decorated.
  */
-export function get(target: any, key: string) {
+export function getDecorators(target: any, key: string) {
     let keyMap = decoratorMap.get(target);
-    if (keyMap === undefined) { return undefined; }
+    if (keyMap === undefined) { return []; }
 
-    return keyMap.get(key);
+    let results = keyMap.get(key);
+    return results || [];
+}
+
+export function getDecoratorsByType<T extends Decorator>(target: any, key: string, type: { new(...args: any[]): T }) {
+    let keyMap = decoratorMap.get(target);
+    if (keyMap === undefined) { return []; }
+
+    return (keyMap.get(key) || []).filter((decorator): decorator is T => decorator instanceof type);
 }
 
 export function command(options?: CommandOptions | string) {
@@ -84,46 +87,32 @@ export function command(options?: CommandOptions | string) {
             options = { name: options };
         }
 
-        add(<CommandDecorator>{ 
-            kind: "command",
-            target, key, options
-        });
+        addDecorator(new CommandDecorator(target, key, options));
     };
 }
 
 export function rest(target: any, key: string, index: number) {
-    add(<RestDecorator>{
+    addDecorator(<RestDecorator>{
         kind: "rest",
         target, key, index 
     });
 }
 
 export function optional(target: any, key: string, index: number) {
-    add(<OptionalDecorator>{
-        kind: "optional",
-        target, key, index 
-    });
+    addDecorator(new OptionalDecorator(target, key, index));
 }
 
 export namespace checks {
     export function owner(target: any, key: string) {
-        add(<CheckDecorator>{
-            kind: "check",
-            check: { type: "owner" },
-            target, key
-        });
+        addDecorator(new CheckDecorator(target, key, { type: "owner" }));
     }
 
     export function check(checkFn: (user: discord.User) => boolean) {
         return function(target: any, key: string) {
-            add(<CheckDecorator>{
-                kind: "check",
-                check: {
-                    type: "custom",
-                    checkFn,
-                },
-                target, key
-            });
+            addDecorator(new CheckDecorator(target, key, { 
+                type: "custom",
+                checkFn
+            }));
         }
     }
 }
