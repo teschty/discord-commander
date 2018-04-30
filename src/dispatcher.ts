@@ -2,6 +2,7 @@ import { CommandClient } from "./client";
 import { Message } from "discord.js";
 import { CommandManager } from "./command-manager";
 import * as discord from "discord.js";
+import { Context, Command } from "./command";
 
 class InvalidArgumentException {
     constructor(public arg: string, public type: string) {
@@ -61,15 +62,36 @@ export class CommandDispatcher {
     constructor(private commandManager: CommandManager) { }
 
     async handleMessage(client: CommandClient, msg: Message) {
-        const content = msg.content;
+        let content = msg.content;
         if (!content.startsWith(client.options.commandPrefix)) { return; }
+        content = content.substring(client.options.commandPrefix.length);
 
         const parts = parseCommand(content);
         const commandName = parts[0];
 
         const rootCommand = this.commandManager.getRootCommand(commandName);
         if (rootCommand === undefined) {
-            if (client.options)
+            if (client.options.unknownCommandResponse) {
+                msg.reply(`Unknown command '${commandName}'`);
+            }
+
+            return;
+        }
+
+        // TODO: handle command groups
+        let argIdx = 1;
+        if (rootCommand instanceof Command) {
+            const typedArgs = await Promise.all(rootCommand.params.map(async param => {
+                if (param.type === Context) {
+                    return new Context(msg.channel as discord.TextChannel, msg, msg.author);
+                }
+
+                return await convertToType(client, parts[argIdx++], param.type)
+            }));
+
+            rootCommand.method.call(rootCommand.gear, ...typedArgs);
+        } else {
+            
         }
     }
 }

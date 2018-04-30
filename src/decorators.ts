@@ -1,4 +1,5 @@
 import * as discord from "discord.js";
+import { CommandOptions } from "./command";
 
 /** Maps from target (class) to key (method) to decorator */
 type DecoratorMap = Map<any, Map<string, Decorator[]>>
@@ -74,28 +75,29 @@ export function getDecoratorsByType<T extends Decorator>(target: any, key: strin
     return (keyMap.get(key) || []).filter((decorator): decorator is T => decorator instanceof type);
 }
 
-export function command(options?: CommandOptions | string) {
-    return (target: any, key: string) => {
-        // if options not supplied
-        // name is defaulted to method name
-        if (options === undefined) {
-            options = { name: target[key].name };
-        }
+export namespace commands { 
+    export function command(options?: CommandOptions | string) {
+        return (target: any, key: string) => {
+            // if options not supplied
+            // name is defaulted to method name
+            if (options === undefined) {
+                options = { name: target[key].name };
+            }
 
-        // if simply supplying name, wrap in options object
-        if (typeof options === "string") {
-            options = { name: options };
-        }
+            // if simply supplying name, wrap in options object
+            if (typeof options === "string") {
+                options = { name: options };
+            }
 
-        addDecorator(new CommandDecorator(target, key, options));
-    };
+            addDecorator(new CommandDecorator(target, key, options));
+        };
+    }
+
+    export function group(name: string)
 }
 
 export function rest(target: any, key: string, index: number) {
-    addDecorator(<RestDecorator>{
-        kind: "rest",
-        target, key, index 
-    });
+    addDecorator(new RestDecorator(target, key, index));
 }
 
 export function optional(target: any, key: string, index: number) {

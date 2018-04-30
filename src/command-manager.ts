@@ -1,5 +1,6 @@
 import { getDecoratorsByType, CommandDecorator } from "./decorators";
 import * as decorators from "./decorators";
+import { Command, CommandGroup } from "./command";
 
 export class CommandManager {
     commands: Map<string, Command | CommandGroup> = new Map();
@@ -8,13 +9,15 @@ export class CommandManager {
         let cls = gear.constructor.prototype;
         let checkDecorators = getDecoratorsByType(cls, methodName, decorators.CheckDecorator);
 
-        this.commands.set(cmdDec.options.name, {
-            kind: "command",
-            name: cmdDec.options.name,
-            disabled: cmdDec.options.disabled || false,
-            params: [],
-            gear
-        });
+        const paramTypes: any[] = Reflect.getMetadata("design:paramtypes", cls, methodName);
+        const params = paramTypes.map(type => ({
+            type,
+            remainder: false, // TODO: This
+            optional: false
+        }));
+
+        this.commands.set(cmdDec.options.name, 
+            new Command(cmdDec.options.name, cls[methodName], params, gear));
     }
 
     getRootCommand(name: string) {
@@ -49,21 +52,3 @@ export class CommandManager {
         }
     }
 }
-
-class MyClass {
-    @decorators.command()
-    func() {
-
-    }
-
-    @decorators.command("myCommand")
-    @decorators.checks.owner
-    myCommand(x: number, @decorators.rest @decorators.optional str: string) {
-
-    }
-}
-
-let gm = new CommandManager();
-
-gm.addGear(new MyClass());
-
