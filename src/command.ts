@@ -24,10 +24,11 @@ interface CommandParameter {
     /** Type of parameter, string, number, etc... */
     type: any;
     /** If set, remainder of given arguments are joined into a single string */
-    remainder: boolean;
+    rest: boolean;
     /** If set, parameter is not required */
     optional: boolean;
 }
+
 export class Command {
     constructor(public name: string, 
                 public method: Function,

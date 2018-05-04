@@ -92,8 +92,6 @@ export namespace commands {
             addDecorator(new CommandDecorator(target, key, options));
         };
     }
-
-    export function group(name: string)
 }
 
 export function rest(target: any, key: string, index: number) {

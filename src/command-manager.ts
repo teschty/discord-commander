@@ -9,11 +9,14 @@ export class CommandManager {
         let cls = gear.constructor.prototype;
         let checkDecorators = getDecoratorsByType(cls, methodName, decorators.CheckDecorator);
 
+        const restDecorators = getDecoratorsByType(cls, methodName, decorators.RestDecorator);
+        const optionalDecorators = getDecoratorsByType(cls, methodName, decorators.OptionalDecorator);
+
         const paramTypes: any[] = Reflect.getMetadata("design:paramtypes", cls, methodName);
-        const params = paramTypes.map(type => ({
+        const params = paramTypes.map((type, i) => ({
             type,
-            remainder: false, // TODO: This
-            optional: false
+            rest: restDecorators.some(dec => dec.index === i),
+            optional: optionalDecorators.some(dec => dec.index === i)
         }));
 
         this.commands.set(cmdDec.options.name, 
