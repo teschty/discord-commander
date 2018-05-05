@@ -5,7 +5,7 @@ import { CommandOptions } from "./command";
 type DecoratorMap = Map<any, Map<string, Decorator[]>>
 const decoratorMap: DecoratorMap = new Map();
 
-class Decorator {
+export class Decorator {
     constructor(public target: any, public key: string) { }
 }
 
@@ -15,7 +15,7 @@ export class CommandDecorator extends Decorator {
     }
 }
 
-type CheckType = { type: "owner" } | {
+export type CheckType = { type: "owner" } | {
     type: "custom",
     checkFn: (user: discord.User) => boolean;
 };

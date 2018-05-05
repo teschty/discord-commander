@@ -20,7 +20,7 @@ export interface CommandOptions {
     disabled?: boolean;
 }
 
-interface CommandParameter {
+export interface CommandParameter {
     /** Type of parameter, string, number, etc... */
     type: any;
     /** If set, remainder of given arguments are joined into a single string */
