@@ -75,23 +75,21 @@ export function getDecoratorsByType<T extends Decorator>(target: any, key: strin
     return (keyMap.get(key) || []).filter((decorator): decorator is T => decorator instanceof type);
 }
 
-export namespace commands { 
-    export function command(options?: CommandOptions | string) {
-        return (target: any, key: string) => {
-            // if options not supplied
-            // name is defaulted to method name
-            if (options === undefined) {
-                options = { name: target[key].name };
-            }
+export function command(options?: CommandOptions | string) {
+    return (target: any, key: string) => {
+        // if options not supplied
+        // name is defaulted to method name
+        if (options === undefined) {
+            options = { name: target[key].name };
+        }
 
-            // if simply supplying name, wrap in options object
-            if (typeof options === "string") {
-                options = { name: options };
-            }
+        // if simply supplying name, wrap in options object
+        if (typeof options === "string") {
+            options = { name: options };
+        }
 
-            addDecorator(new CommandDecorator(target, key, options));
-        };
-    }
+        addDecorator(new CommandDecorator(target, key, options));
+    };
 }
 
 export function rest(target: any, key: string, index: number) {
