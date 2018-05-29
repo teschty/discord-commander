@@ -14,14 +14,14 @@ class InvalidArgumentException {
 /** Splits a string on spaces while preserving quoted text */
 function parseCommand(cmd: string) {
     const splitRegex = /[^\s"]+|"([^"]*)"/gi;
-    const result: string[] = [];
+    const result: { text: string; index: number; length: number }[] = [];
 
     let match: any;
     do {
         match = splitRegex.exec(cmd);
 
         if (match) {
-            result.push(match[1] ? match[1] : match[0]);
+            result.push({ text: match[1] ? match[1] : match[0], index: match.index, length: match.length });
         }
     } while (match != null);
 
@@ -82,10 +82,10 @@ export class CommandDispatcher {
         const parts = parseCommand(content);
         const commandName = parts[0];
 
-        const rootCommand = this.commandManager.getRootCommand(commandName);
+        const rootCommand = this.commandManager.getRootCommand(commandName.text);
         if (rootCommand === undefined) {
             if (client.options.unknownCommandResponse) {
-                msg.reply(`unknown command '${commandName}'`);
+                await msg.reply(`unknown command '${commandName}'`);
             }
 
             return;
@@ -113,22 +113,23 @@ export class CommandDispatcher {
                     throw new TooFewArgumentsException();
                 }
 
-                return await convertToType(client, parts[argIdx++], param.type)
+                return await convertToType(client, parts[argIdx++].text, param.type)
             })).catch((err: TooFewArgumentsException | InvalidTypeException) => {
                 return err;
             });
 
             if (typedArgs instanceof InvalidTypeException) {
-                msg.channel.send(`Invalid argument '${typedArgs.provided}', expected argument of type '${typedArgs.expectedType}'`);
+                await msg.channel.send(`Invalid argument '${typedArgs.provided}', expected argument of type '${typedArgs.expectedType}'`);
                 return;
             } else if (typedArgs instanceof TooFewArgumentsException) {
                 let expectedNumArgs = params.length - params.filter(p => p.optional).length;
-                msg.channel.send(`Expected ${expectedNumArgs} argument(s), but got ${parts.length} argument(s)`);
+                await msg.channel.send(`Expected ${expectedNumArgs} argument(s), but got ${parts.length} argument(s)`);
                 return;
             }
 
             if (restIndex !== -1) {
-                typedArgs = typedArgs.concat(parts.slice(restIndex).join(" "));
+                let lastPart = parts[restIndex - 1];
+                typedArgs.push(content.substring(lastPart.index + lastPart.length + 1));
             }
 
             rootCommand.method.call(rootCommand.gear, ...typedArgs as any[]);
