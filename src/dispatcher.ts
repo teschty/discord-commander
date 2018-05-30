@@ -129,7 +129,7 @@ export class CommandDispatcher {
 
             if (restIndex !== -1) {
                 let lastPart = parts[restIndex - 1];
-                typedArgs.push(content.substring(lastPart.index + lastPart.length + 1));
+                typedArgs.push(content.substring(lastPart.index + lastPart.text.length + 1));
             }
 
             rootCommand.method.call(rootCommand.gear, ...typedArgs as any[]);
