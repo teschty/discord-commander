@@ -33,7 +33,7 @@ class InvalidTypeException {
 }
 
 /** Attempts to convert string values to specified type */
-async function convertToType(client: CommandClient, item: string, type: any) {
+async function convertToType(client: CommandClient, guild: discord.Guild, item: string, type: any) {
     try {
         switch (type) {
             case Number:
@@ -51,6 +51,14 @@ async function convertToType(client: CommandClient, item: string, type: any) {
                 }
 
                 return client.fetchUser(item);
+
+            case discord.GuildMember:
+                // if mention, message will be <@id>
+                if (item.startsWith("<")) {
+                    item = item.substring(2, item.length - 1);
+                }
+
+                return guild.fetchMember(item);
 
             case Object:
             case String:
@@ -113,7 +121,7 @@ export class CommandDispatcher {
                     throw new TooFewArgumentsException();
                 }
 
-                return await convertToType(client, parts[argIdx++].text, param.type)
+                return await convertToType(client, msg.guild, parts[argIdx++].text, param.type)
             })).catch((err: TooFewArgumentsException | InvalidTypeException) => {
                 return err;
             });
