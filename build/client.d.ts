@@ -14,5 +14,6 @@ export declare class CommandClient extends discord.Client {
     commandManager: CommandManager;
     options: Required<ClientOptions> & discord.ClientOptions;
     constructor(options?: ClientOptions & discord.ClientOptions);
+    getLastResponsesToUser(user: discord.User): discord.Message[];
     addGear(gear: any): void;
 }

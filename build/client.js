@@ -10,6 +10,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const discord = __importStar(require("discord.js"));
 const dispatcher_1 = require("./dispatcher");
 const command_manager_1 = require("./command-manager");
+const command = __importStar(require("./command"));
 class CommandClient extends discord.Client {
     constructor(options = {}) {
         if (options.commandPrefix === undefined) {
@@ -26,6 +27,9 @@ class CommandClient extends discord.Client {
         this.commandManager = new command_manager_1.CommandManager();
         this.dispatcher = new dispatcher_1.CommandDispatcher(this.commandManager);
         this.on("message", msg => this.dispatcher.handleMessage(this, msg));
+    }
+    getLastResponsesToUser(user) {
+        return command.getLastResponsesToUser(user);
     }
     addGear(gear) {
         this.commandManager.addGear(gear);

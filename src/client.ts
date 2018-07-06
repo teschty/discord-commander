@@ -1,6 +1,7 @@
 import * as discord from "discord.js";
 import { CommandDispatcher } from "./dispatcher";
 import { CommandManager } from "./command-manager";
+import * as command from "./command";
 
 export interface ClientOptions {
     /** Character or string that prefaces each command */
@@ -28,6 +29,10 @@ export class CommandClient extends discord.Client {
         this.dispatcher = new CommandDispatcher(this.commandManager);
 
         this.on("message", msg => this.dispatcher.handleMessage(this, msg));
+    }
+
+    getLastResponsesToUser(user: discord.User) {
+        return command.getLastResponsesToUser(user);
     }
 
     addGear(gear: any) {

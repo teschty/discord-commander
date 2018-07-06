@@ -1,14 +1,34 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+let lastResponsesByUser = {};
+function saveMessageProxy(channel, user, func) {
+    return ((...args) => {
+        return func(...args).then(msg => {
+            let lastResponses = lastResponsesByUser[user.id] || [];
+            lastResponses.push(msg);
+            if (lastResponses.length > 5) {
+                lastResponses = lastResponses.slice(lastResponses.length - 5);
+                lastResponsesByUser[user.id] = lastResponses;
+            }
+            return msg;
+        });
+    });
+}
+function getLastResponsesToUser(user) {
+    return lastResponsesByUser[user.id] || [];
+}
+exports.getLastResponsesToUser = getLastResponsesToUser;
 // Has to be class, otherwise reflection can't see it
 class Context {
     constructor(channel, message, user) {
         this.channel = channel;
         this.message = message;
         this.user = user;
-    }
-    send(text) {
-        return this.channel.send(text);
+        this.send = saveMessageProxy(this.channel, this.user, this.channel.send);
+        this.sendCode = saveMessageProxy(this.channel, this.user, this.channel.sendCode);
+        this.sendEmbed = saveMessageProxy(this.channel, this.user, this.channel.sendEmbed);
+        this.sendFile = saveMessageProxy(this.channel, this.user, this.channel.sendFile);
+        this.sendMessage = saveMessageProxy(this.channel, this.user, this.channel.sendMessage);
     }
 }
 exports.Context = Context;

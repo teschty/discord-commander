@@ -1,11 +1,26 @@
 import * as discord from "discord.js";
+import { Message } from "discord.js";
+export declare function getLastResponsesToUser(user: discord.User): Message[];
 export declare type CommandMap = Map<string, Command>;
 export declare class Context {
     channel: discord.TextChannel;
     message: discord.Message;
     user: discord.User;
     constructor(channel: discord.TextChannel, message: discord.Message, user: discord.User);
-    send(text: string): Promise<discord.Message | discord.Message[]>;
+    send: {
+        (content?: any, options?: discord.Attachment | discord.RichEmbed | discord.MessageOptions | undefined): Promise<discord.Message | discord.Message[]>;
+        (options?: discord.Attachment | discord.RichEmbed | discord.MessageOptions | undefined): Promise<discord.Message | discord.Message[]>;
+    };
+    sendCode: (lang: string, content: any, options?: discord.MessageOptions | undefined) => Promise<discord.Message | discord.Message[]>;
+    sendEmbed: {
+        (embed: discord.RichEmbed | discord.RichEmbedOptions, content?: string | undefined, options?: discord.MessageOptions | undefined): Promise<discord.Message>;
+        (embed: discord.RichEmbed | discord.RichEmbedOptions, options?: discord.MessageOptions | undefined): Promise<discord.Message>;
+    };
+    sendFile: (attachment: discord.BufferResolvable, name?: string | undefined, content?: any, options?: discord.MessageOptions | undefined) => Promise<discord.Message>;
+    sendMessage: {
+        (content?: string | undefined, options?: discord.MessageOptions | undefined): Promise<discord.Message | discord.Message[]>;
+        (options?: discord.MessageOptions | undefined): Promise<discord.Message | discord.Message[]>;
+    };
 }
 export interface CommandOptions {
     /** Name of command - defaults to function name */
