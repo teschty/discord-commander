@@ -18,6 +18,15 @@ function getLastResponsesToUser(user) {
     return lastResponsesByUser[user.id] || [];
 }
 exports.getLastResponsesToUser = getLastResponsesToUser;
+async function deleteLastResponsesToUser(user, numberToDelete) {
+    let lastResponses = (lastResponsesByUser[user.id] || []).reverse();
+    numberToDelete = Math.min(numberToDelete, lastResponses.length);
+    for (let i = 0; i < numberToDelete; i++) {
+        await lastResponses[i].delete();
+    }
+    lastResponsesByUser[user.id] = lastResponses;
+}
+exports.deleteLastResponsesToUser = deleteLastResponsesToUser;
 // Has to be class, otherwise reflection can't see it
 class Context {
     constructor(channel, message, user) {

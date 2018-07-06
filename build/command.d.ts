@@ -1,6 +1,7 @@
 import * as discord from "discord.js";
 import { Message } from "discord.js";
 export declare function getLastResponsesToUser(user: discord.User): Message[];
+export declare function deleteLastResponsesToUser(user: discord.User, numberToDelete: number): Promise<void>;
 export declare type CommandMap = Map<string, Command>;
 export declare class Context {
     channel: discord.TextChannel;

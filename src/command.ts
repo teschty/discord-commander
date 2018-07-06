@@ -6,7 +6,7 @@ let lastResponsesByUser: { [id: string]: Message[] } = {};
 function saveMessageProxy<T>(channel: discord.TextChannel, user: discord.User, func: T) {
     return ((...args: any[]) => {
         return (((func as any).bind(channel))(...args) as Promise<Message>).then(msg => {
-            let lastResponses = lastResponsesByUser[user.id] || [] as Message[];
+            let lastResponses = lastResponsesByUser[user.id] || [];
 
             lastResponses.push(msg);
 
@@ -23,6 +23,17 @@ function saveMessageProxy<T>(channel: discord.TextChannel, user: discord.User, f
 
 export function getLastResponsesToUser(user: discord.User): Message[] {
     return lastResponsesByUser[user.id] || [];
+}
+
+export async function deleteLastResponsesToUser(user: discord.User, numberToDelete: number) {
+    let lastResponses = (lastResponsesByUser[user.id] || []).reverse();
+
+    numberToDelete = Math.min(numberToDelete, lastResponses.length);
+    for (let i = 0; i < numberToDelete; i++) {
+        await lastResponses[i].delete();
+    }
+
+    lastResponsesByUser[user.id] = lastResponses;
 }
 
 export type CommandMap = Map<string, Command>;
