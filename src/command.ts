@@ -12,8 +12,9 @@ function saveMessageProxy<T>(channel: discord.TextChannel, user: discord.User, f
 
             if (lastResponses.length > 5) {
                 lastResponses = lastResponses.slice(lastResponses.length - 5);
-                lastResponsesByUser[user.id] = lastResponses;
             }
+            
+            lastResponsesByUser[user.id] = lastResponses;
 
             return msg;
         });
