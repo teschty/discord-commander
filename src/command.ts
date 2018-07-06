@@ -5,7 +5,7 @@ let lastResponsesByUser: { [id: string]: Message[] } = {};
 
 function saveMessageProxy<T>(channel: discord.TextChannel, user: discord.User, func: T) {
     return ((...args: any[]) => {
-        return ((func as any)(...args) as Promise<Message>).then(msg => {
+        return (((func as any).bind(channel))(...args) as Promise<Message>).then(msg => {
             let lastResponses = lastResponsesByUser[user.id] || [] as Message[];
 
             lastResponses.push(msg);
