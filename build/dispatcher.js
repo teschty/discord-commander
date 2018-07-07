@@ -51,13 +51,13 @@ async function convertToType(client, guild, item, type) {
                 if (item.startsWith("<")) {
                     item = item.substring(2, item.length - 1);
                 }
-                return client.fetchUser(item);
+                return client.users.fetch(item);
             case discord.GuildMember:
                 // if mention, message will be <@id>
                 if (item.startsWith("<")) {
                     item = item.substring(2, item.length - 1);
                 }
-                return guild.fetchMember(item);
+                return guild.members.fetch(item);
             case Object:
             case String:
                 return item;
@@ -107,7 +107,7 @@ class CommandDispatcher {
             }
             let typedArgs = await Promise.all(params.map(async (param) => {
                 if (param.type === command_1.Context) {
-                    return new command_1.Context(msg.channel, msg, msg.author);
+                    return new command_1.Context(msg.channel, msg, msg.author, msg.guild);
                 }
                 // if we're out of text, and this is optional - return nothing
                 if (argIdx >= parts.length) {

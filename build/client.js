@@ -31,6 +31,9 @@ class CommandClient extends discord.Client {
     getLastResponsesToUser(user) {
         return command.getLastResponsesToUser(user);
     }
+    deleteLastResponsesToUser(user, numberToDelete) {
+        return command.deleteLastResponsesToUser(user, numberToDelete);
+    }
     addGear(gear) {
         this.commandManager.addGear(gear);
     }

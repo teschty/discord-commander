@@ -24,20 +24,18 @@ async function deleteLastResponsesToUser(user, numberToDelete) {
     for (let i = 0; i < numberToDelete; i++) {
         await lastResponses[i].delete();
     }
-    lastResponsesByUser[user.id] = lastResponses;
+    lastResponses = lastResponses.splice(0, lastResponses.length - numberToDelete);
+    lastResponsesByUser[user.id] = lastResponses.reverse();
 }
 exports.deleteLastResponsesToUser = deleteLastResponsesToUser;
 // Has to be class, otherwise reflection can't see it
 class Context {
-    constructor(channel, message, user) {
+    constructor(channel, message, user, guild) {
         this.channel = channel;
         this.message = message;
         this.user = user;
+        this.guild = guild;
         this.send = saveMessageProxy(this.channel, this.user, this.channel.send);
-        this.sendCode = saveMessageProxy(this.channel, this.user, this.channel.sendCode);
-        this.sendEmbed = saveMessageProxy(this.channel, this.user, this.channel.sendEmbed);
-        this.sendFile = saveMessageProxy(this.channel, this.user, this.channel.sendFile);
-        this.sendMessage = saveMessageProxy(this.channel, this.user, this.channel.sendMessage);
     }
 }
 exports.Context = Context;

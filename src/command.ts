@@ -1,11 +1,10 @@
 import * as discord from "discord.js";
-import { RichEmbed, RichEmbedOptions, MessageOptions, StringResolvable, Attachment, Message, BufferResolvable } from "discord.js";
 
-let lastResponsesByUser: { [id: string]: Message[] } = {};
+let lastResponsesByUser: { [id: string]: discord.Message[] } = {};
 
 function saveMessageProxy<T>(channel: discord.TextChannel, user: discord.User, func: T) {
     return ((...args: any[]) => {
-        return (((func as any).bind(channel))(...args) as Promise<Message>).then(msg => {
+        return (((func as any).bind(channel))(...args) as Promise<discord.Message>).then(msg => {
             let lastResponses = lastResponsesByUser[user.id] || [];
 
             lastResponses.push(msg);
@@ -21,7 +20,7 @@ function saveMessageProxy<T>(channel: discord.TextChannel, user: discord.User, f
     }) as any as T;
 }
 
-export function getLastResponsesToUser(user: discord.User): Message[] {
+export function getLastResponsesToUser(user: discord.User): discord.Message[] {
     return lastResponsesByUser[user.id] || [];
 }
 
@@ -33,7 +32,8 @@ export async function deleteLastResponsesToUser(user: discord.User, numberToDele
         await lastResponses[i].delete();
     }
 
-    lastResponsesByUser[user.id] = lastResponses;
+    lastResponses = lastResponses.splice(0, lastResponses.length - numberToDelete);
+    lastResponsesByUser[user.id] = lastResponses.reverse();
 }
 
 export type CommandMap = Map<string, Command>;
@@ -42,13 +42,10 @@ export type CommandMap = Map<string, Command>;
 export class Context {
     constructor(public channel: discord.TextChannel, 
                 public message: discord.Message, 
-                public user: discord.User) { }
+                public user: discord.User,
+                public guild?: discord.Guild) { }
 
     send = saveMessageProxy(this.channel, this.user, this.channel.send);
-    sendCode = saveMessageProxy(this.channel, this.user, this.channel.sendCode);
-    sendEmbed = saveMessageProxy(this.channel, this.user, this.channel.sendEmbed);
-    sendFile = saveMessageProxy(this.channel, this.user, this.channel.sendFile);
-    sendMessage = saveMessageProxy(this.channel, this.user, this.channel.sendMessage);
 }
 
 export interface CommandOptions {

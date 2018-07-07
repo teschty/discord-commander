@@ -50,7 +50,7 @@ async function convertToType(client: CommandClient, guild: discord.Guild, item: 
                     item = item.substring(2, item.length - 1);
                 }
 
-                return client.fetchUser(item);
+                return client.users.fetch(item);
 
             case discord.GuildMember:
                 // if mention, message will be <@id>
@@ -58,7 +58,7 @@ async function convertToType(client: CommandClient, guild: discord.Guild, item: 
                     item = item.substring(2, item.length - 1);
                 }
 
-                return guild.fetchMember(item);
+                return guild.members.fetch(item);
 
             case Object:
             case String:
@@ -112,7 +112,7 @@ export class CommandDispatcher {
 
             let typedArgs = await Promise.all(params.map(async param => {
                 if (param.type === Context) {
-                    return new Context(msg.channel as discord.TextChannel, msg, msg.author);
+                    return new Context(msg.channel as discord.TextChannel, msg, msg.author, msg.guild);
                 }
 
                 // if we're out of text, and this is optional - return nothing
