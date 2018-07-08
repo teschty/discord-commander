@@ -106,7 +106,7 @@ export class CommandDispatcher {
             let text = parts[i].text;
 
             if (text.startsWith("--")) {
-                flags[text.substring(2)] = parts[i + 1];
+                flags[text.substring(2)] = parts[i + 1].text;
                 parts = parts.slice(0, i).concat(parts.slice(i + 2));
                 i -= 1;
             }
