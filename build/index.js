@@ -13,5 +13,6 @@ exports.optional = decorators_1.optional;
 exports.checks = decorators_1.checks;
 var command_1 = require("./command");
 exports.Context = command_1.Context;
+exports.Flags = command_1.Flags;
 __export(require("discord.js"));
 //# sourceMappingURL=index.js.map

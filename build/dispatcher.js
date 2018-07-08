@@ -101,9 +101,13 @@ class CommandDispatcher {
         for (let i = 0; i < parts.length; i++) {
             let text = parts[i].text;
             if (text.startsWith("--")) {
-                flags[text.substring(2)] = parts[i + 1];
-                parts = parts.slice(0, i).concat(parts.slice(i + 2));
-                i -= 1;
+                if (text.includes("=")) {
+                    let flagParts = text.split("=");
+                    flags[flagParts[0].substring(2)] = flagParts[1];
+                }
+                else {
+                    flags[text.substring(2)] = true;
+                }
             }
         }
         let argIdx = 1;
