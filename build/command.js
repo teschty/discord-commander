@@ -39,6 +39,12 @@ class Context {
     }
 }
 exports.Context = Context;
+class Flags {
+    constructor(obj) {
+        this.flag = Object.assign({}, obj);
+    }
+}
+exports.Flags = Flags;
 class Command {
     constructor(name, method, params, gear) {
         this.name = name;

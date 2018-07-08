@@ -87,14 +87,24 @@ class CommandDispatcher {
             return;
         }
         let content = msg.content.substring(client.options.commandPrefix.length);
-        const parts = parseCommand(content);
-        const commandName = parts[0];
+        let parts = parseCommand(content);
+        let commandName = parts[0];
         const rootCommand = this.commandManager.getRootCommand(commandName.text);
         if (rootCommand === undefined) {
             if (client.options.unknownCommandResponse) {
                 await msg.reply(`unknown command '${commandName}'`);
             }
             return;
+        }
+        // strip flags
+        let flags = {};
+        for (let i = 0; i < parts.length; i++) {
+            let text = parts[i].text;
+            if (text.startsWith("--")) {
+                flags[text.substring(2)] = parts[i + 1];
+                parts = parts.slice(0, i).concat(parts.slice(i + 2));
+                i -= 1;
+            }
         }
         let argIdx = 1;
         if (rootCommand instanceof command_1.Command) {
@@ -108,6 +118,9 @@ class CommandDispatcher {
             let typedArgs = await Promise.all(params.map(async (param) => {
                 if (param.type === command_1.Context) {
                     return new command_1.Context(msg.channel, msg, msg.author, msg.guild);
+                }
+                else if (param.type === command_1.Flags) {
+                    return new command_1.Flags(flags);
                 }
                 // if we're out of text, and this is optional - return nothing
                 if (argIdx >= parts.length) {
