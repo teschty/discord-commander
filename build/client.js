@@ -19,8 +19,8 @@ class CommandClient extends discord.Client {
         if (options.unknownCommandResponse === undefined) {
             options.unknownCommandResponse = false;
         }
-        if (options.owner === undefined) {
-            options.owner = "";
+        if (options.owners === undefined) {
+            options.owners = [];
         }
         super(options);
         this.commandManager = new command_manager_1.CommandManager();

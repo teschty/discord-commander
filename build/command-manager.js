@@ -25,7 +25,7 @@ class CommandManager {
             rest: restDecorators.some(dec => dec.index === i),
             optional: optionalDecorators.some(dec => dec.index === i)
         }));
-        this.commands.set(cmdDec.options.name, new command_1.Command(cmdDec.options.name, cls[methodName], params, gear));
+        this.commands.set(cmdDec.options.name, new command_1.Command(cmdDec.options.name, cls[methodName], params, gear, checkDecorators));
     }
     getRootCommand(name) {
         return this.commands.get(name);

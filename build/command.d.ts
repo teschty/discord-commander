@@ -1,4 +1,6 @@
 import * as discord from "discord.js";
+import { CheckDecorator } from "./decorators";
+import { CommandClient } from "./client";
 export declare function getLastResponsesToUser(user: discord.User): discord.Message[];
 export declare function deleteLastResponsesToUser(user: discord.User, numberToDelete: number): Promise<void>;
 export declare type CommandMap = Map<string, Command>;
@@ -34,7 +36,9 @@ export declare class Command {
     method: Function;
     params: CommandParameter[];
     gear: any;
-    constructor(name: string, method: Function, params: CommandParameter[], gear: any);
+    checks: CheckDecorator[];
+    constructor(name: string, method: Function, params: CommandParameter[], gear: any, checks: CheckDecorator[]);
+    performChecks(bot: CommandClient, user: discord.User): Error | undefined;
 }
 export declare class CommandGroup {
     name: string;

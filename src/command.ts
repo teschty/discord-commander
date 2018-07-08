@@ -1,4 +1,6 @@
 import * as discord from "discord.js";
+import { CheckDecorator } from "./decorators";
+import { CommandClient } from "./client";
 
 let lastResponsesByUser: { [id: string]: discord.Message[] } = {};
 
@@ -43,7 +45,7 @@ export class Context {
     constructor(public channel: discord.TextChannel, 
                 public message: discord.Message, 
                 public user: discord.User,
-                public guild?: discord.Guild) { }
+                public guild?: discord.Guild) {}
 
     send = saveMessageProxy(this.channel, this.user, this.channel.send);
 }
@@ -70,7 +72,17 @@ export class Command {
     constructor(public name: string, 
                 public method: Function,
                 public params: CommandParameter[],
-                public gear: any) { }
+                public gear: any,
+                public checks: CheckDecorator[]
+            ) { }
+
+    performChecks(bot: CommandClient, user: discord.User) {
+        for (let check of this.checks) {
+            if (!check.performCheck(bot, user)) {
+                return new Error(check.failureMessage);
+            }
+        }
+    }
 }
 
 export class CommandGroup {

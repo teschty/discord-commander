@@ -7,7 +7,7 @@ export interface ClientOptions {
     /** Whether the bot should respond to an unknown command */
     unknownCommandResponse?: boolean;
     /** The owner(s) of the bot */
-    owner?: string | string[] | Set<string>;
+    owners?: string[];
 }
 export declare class CommandClient extends discord.Client {
     dispatcher: CommandDispatcher;

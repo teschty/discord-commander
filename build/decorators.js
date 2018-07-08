@@ -16,9 +16,18 @@ class CommandDecorator extends Decorator {
 }
 exports.CommandDecorator = CommandDecorator;
 class CheckDecorator extends Decorator {
-    constructor(target, key, check) {
+    constructor(target, key, check, failureMessage) {
         super(target, key);
         this.check = check;
+        this.failureMessage = failureMessage;
+    }
+    performCheck(bot, user) {
+        if (this.check.type === "owner") {
+            return bot.options.owners.includes(user.id);
+        }
+        else {
+            return this.check.checkFn(user);
+        }
     }
 }
 exports.CheckDecorator = CheckDecorator;
@@ -111,16 +120,18 @@ function optional(target, key, index) {
 exports.optional = optional;
 var checks;
 (function (checks) {
-    function owner(target, key) {
-        addDecorator(new CheckDecorator(target, key, { type: "owner" }));
+    function isOwner(failureMessage) {
+        return (target, key) => {
+            failureMessage = failureMessage || "Only a bot owner may perform that action.";
+            addDecorator(new CheckDecorator(target, key, { type: "owner" }, failureMessage));
+        };
     }
-    checks.owner = owner;
-    function check(checkFn) {
-        return function (target, key) {
-            addDecorator(new CheckDecorator(target, key, {
-                type: "custom",
-                checkFn
-            }));
+    checks.isOwner = isOwner;
+    function check(checkFn, failureMessage) {
+        return (target, key) => {
+            failureMessage = failureMessage || "You lack sufficient permissions to perform that action.";
+            let checkDef = { type: "custom", checkFn };
+            addDecorator(new CheckDecorator(target, key, checkDef, failureMessage));
         };
     }
     checks.check = check;

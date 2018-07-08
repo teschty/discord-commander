@@ -43,11 +43,19 @@ class Flags {
 }
 exports.Flags = Flags;
 class Command {
-    constructor(name, method, params, gear) {
+    constructor(name, method, params, gear, checks) {
         this.name = name;
         this.method = method;
         this.params = params;
         this.gear = gear;
+        this.checks = checks;
+    }
+    performChecks(bot, user) {
+        for (let check of this.checks) {
+            if (!check.performCheck(bot, user)) {
+                return new Error(check.failureMessage);
+            }
+        }
     }
 }
 exports.Command = Command;

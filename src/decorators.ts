@@ -1,5 +1,7 @@
 import * as discord from "discord.js";
 import { CommandOptions } from "./command";
+import { CommandClient } from "./client";
+import { fail } from "assert";
 
 /** Maps from target (class) to key (method) to decorator */
 type DecoratorMap = Map<any, Map<string, Decorator[]>>
@@ -21,8 +23,16 @@ export type CheckType = { type: "owner" } | {
 };
 
 export class CheckDecorator extends Decorator {
-    constructor(target: any, key: string, public check: CheckType) {
+    constructor(target: any, key: string, public check: CheckType, public failureMessage: string) {
         super(target, key);
+    }
+
+    performCheck(bot: CommandClient, user: discord.User) {
+        if (this.check.type === "owner") {
+            return bot.options.owners.includes(user.id);
+        } else {
+            return this.check.checkFn(user);
+        }
     }
 }
 
@@ -115,16 +125,19 @@ export function optional(target: any, key: string, index: number) {
 }
 
 export namespace checks {
-    export function owner(target: any, key: string) {
-        addDecorator(new CheckDecorator(target, key, { type: "owner" }));
+    export function isOwner(failureMessage?: string) {
+        return (target: any, key: string) => {
+            failureMessage = failureMessage || "Only a bot owner may perform that action.";
+            addDecorator(new CheckDecorator(target, key, { type: "owner" }, failureMessage));
+        };
     }
 
-    export function check(checkFn: (user: discord.User) => boolean) {
-        return function(target: any, key: string) {
-            addDecorator(new CheckDecorator(target, key, { 
-                type: "custom",
-                checkFn
-            }));
-        }
+    export function check(checkFn: (user: discord.User) => boolean, failureMessage?: string) {
+        return (target: any, key: string) => {
+            failureMessage = failureMessage || "You lack sufficient permissions to perform that action.";
+
+            let checkDef: CheckType = { type: "custom", checkFn };
+            addDecorator(new CheckDecorator(target, key, checkDef, failureMessage));
+        };
     }
 }

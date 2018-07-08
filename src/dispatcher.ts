@@ -3,6 +3,7 @@ import { Message } from "discord.js";
 import { CommandManager } from "./command-manager";
 import * as discord from "discord.js";
 import { Context, Command, Flags } from "./command";
+import { INSPECT_MAX_BYTES } from "buffer";
 
 class InvalidArgumentException {
     constructor(public arg: string, public type: string) {
@@ -43,6 +44,24 @@ async function convertToType(client: CommandClient, guild: discord.Guild, item: 
                 }
 
                 return result;
+
+            case Boolean:
+                switch (item.toLowerCase()) {
+                    case "y":
+                    case "t":
+                    case "yes":
+                    case "true":
+                        return true;
+
+                    case "n":
+                    case "f":
+                    case "no":
+                    case "false":
+                        return false;
+
+                    default:
+                        throw new InvalidArgumentException(item, "boolean");
+                }
             
             case discord.User:
                 // if mention, message will be <@id>
@@ -87,6 +106,7 @@ class UnknownFlagException {
 export class CommandDispatcher {
     constructor(private commandManager: CommandManager) { }
 
+    // TODO: break this up
     async handleMessage(client: CommandClient, msg: Message) {
         if (!msg.content.startsWith(client.options.commandPrefix)) { return; }
         let content = msg.content.substring(client.options.commandPrefix.length);
@@ -114,15 +134,21 @@ export class CommandDispatcher {
                     let flagParts = text.split("=");
                     flags[flagParts[0].substring(2)] = flagParts[1];
                 } else {
-                    flags[text.substring(2)] = true;
+                    flags[text.substring(2)] = "true";
                 }
 
                 parts.splice(i, 1);
+                i -= 1;
             }
         }
 
         let argIdx = 1;
         if (rootCommand instanceof Command) {
+            let checkResult = rootCommand.performChecks(client, msg.author);
+            if (checkResult instanceof Error) {
+                return await msg.channel.send(checkResult.message);
+            }
+
             let params = rootCommand.params;
 
             // only want to convert parameters up to the @rest param
@@ -144,11 +170,7 @@ export class CommandDispatcher {
                             throw new UnknownFlagException(key);
                         }
 
-                        if (type !== Boolean) {
-                            flagObject[key] = await convertToType(client, msg.guild, flags[key], type);
-                        } else {
-                            flagObject[key] = true;
-                        }
+                        flagObject[key] = await convertToType(client, msg.guild, flags[key], type);
                     }
 
                     return flagObject;
@@ -166,15 +188,13 @@ export class CommandDispatcher {
             });
 
             if (typedArgs instanceof InvalidTypeException) {
-                await msg.channel.send(`Invalid argument '${typedArgs.provided}', expected argument of type '${typedArgs.expectedType}'`);
-                return;
+                return await msg.channel.send(`Invalid argument '${typedArgs.provided}', expected argument of type '${typedArgs.expectedType}'`);
             } else if (typedArgs instanceof TooFewArgumentsException) {
                 let expectedNumArgs = params.length - params.filter(p => p.optional).length;
                 await msg.channel.send(`Expected ${expectedNumArgs} argument(s), but got ${parts.length} argument(s)`);
                 return;
             } else if (typedArgs instanceof UnknownFlagException) {
-                await msg.channel.send(`Command "${commandName.text}" has no flag "${typedArgs.name}"`);
-                return;
+                return await msg.channel.send(`Command "${commandName.text}" has no flag "${typedArgs.name}"`);
             }
 
             if (restIndex !== -1) {

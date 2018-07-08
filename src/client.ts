@@ -9,7 +9,7 @@ export interface ClientOptions {
     /** Whether the bot should respond to an unknown command */
     unknownCommandResponse?: boolean;
     /** The owner(s) of the bot */
-    owner?: string | string[] | Set<string>;
+    owners?: string[];
 }
 
 export class CommandClient extends discord.Client {
@@ -20,7 +20,7 @@ export class CommandClient extends discord.Client {
     constructor(options: ClientOptions & discord.ClientOptions = {}) {
         if (options.commandPrefix === undefined) { options.commandPrefix = "!"; }
         if (options.unknownCommandResponse === undefined) { options.unknownCommandResponse = false; }
-        if (options.owner === undefined) { options.owner = ""; }
+        if (options.owners === undefined) { options.owners = []; }
         
         super(options);
 

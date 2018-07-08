@@ -20,7 +20,7 @@ export class CommandManager {
         }));
 
         this.commands.set(cmdDec.options.name, 
-            new Command(cmdDec.options.name, cls[methodName], params, gear));
+            new Command(cmdDec.options.name, cls[methodName], params, gear, checkDecorators));
     }
 
     getRootCommand(name: string) {

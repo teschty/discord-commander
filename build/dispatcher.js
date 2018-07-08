@@ -46,6 +46,21 @@ async function convertToType(client, guild, item, type) {
                     throw new InvalidArgumentException(item, "number");
                 }
                 return result;
+            case Boolean:
+                switch (item.toLowerCase()) {
+                    case "y":
+                    case "t":
+                    case "yes":
+                    case "true":
+                        return true;
+                    case "n":
+                    case "f":
+                    case "no":
+                    case "false":
+                        return false;
+                    default:
+                        throw new InvalidArgumentException(item, "boolean");
+                }
             case discord.User:
                 // if mention, message will be <@id>
                 if (item.startsWith("<")) {
@@ -87,6 +102,7 @@ class CommandDispatcher {
     constructor(commandManager) {
         this.commandManager = commandManager;
     }
+    // TODO: break this up
     async handleMessage(client, msg) {
         if (!msg.content.startsWith(client.options.commandPrefix)) {
             return;
@@ -111,13 +127,18 @@ class CommandDispatcher {
                     flags[flagParts[0].substring(2)] = flagParts[1];
                 }
                 else {
-                    flags[text.substring(2)] = true;
+                    flags[text.substring(2)] = "true";
                 }
                 parts.splice(i, 1);
+                i -= 1;
             }
         }
         let argIdx = 1;
         if (rootCommand instanceof command_1.Command) {
+            let checkResult = rootCommand.performChecks(client, msg.author);
+            if (checkResult instanceof Error) {
+                return await msg.channel.send(checkResult.message);
+            }
             let params = rootCommand.params;
             // only want to convert parameters up to the @rest param
             // which is only allowed to be of type string
@@ -136,12 +157,7 @@ class CommandDispatcher {
                         if (type === undefined) {
                             throw new UnknownFlagException(key);
                         }
-                        if (type !== Boolean) {
-                            flagObject[key] = await convertToType(client, msg.guild, flags[key], type);
-                        }
-                        else {
-                            flagObject[key] = true;
-                        }
+                        flagObject[key] = await convertToType(client, msg.guild, flags[key], type);
                     }
                     return flagObject;
                 }
@@ -157,8 +173,7 @@ class CommandDispatcher {
                 return err;
             });
             if (typedArgs instanceof InvalidTypeException) {
-                await msg.channel.send(`Invalid argument '${typedArgs.provided}', expected argument of type '${typedArgs.expectedType}'`);
-                return;
+                return await msg.channel.send(`Invalid argument '${typedArgs.provided}', expected argument of type '${typedArgs.expectedType}'`);
             }
             else if (typedArgs instanceof TooFewArgumentsException) {
                 let expectedNumArgs = params.length - params.filter(p => p.optional).length;
@@ -166,14 +181,14 @@ class CommandDispatcher {
                 return;
             }
             else if (typedArgs instanceof UnknownFlagException) {
-                await msg.channel.send(`Command "${commandName.text}" has no flag "${typedArgs.name}"`);
-                return;
+                return await msg.channel.send(`Command "${commandName.text}" has no flag "${typedArgs.name}"`);
             }
             if (restIndex !== -1) {
                 let lastPart = parts[restIndex - 1];
                 typedArgs.push(content.substring(lastPart.index + lastPart.text.length + 1));
             }
             let result = rootCommand.method.call(rootCommand.gear, ...typedArgs);
+            // may not return a promise if command isn't async
             if (result instanceof Promise) {
                 result.catch(async (err) => {
                     await msg.channel.send("An error occurred while executing command: " + err);

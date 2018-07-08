@@ -1,5 +1,6 @@
 import * as discord from "discord.js";
 import { CommandOptions } from "./command";
+import { CommandClient } from "./client";
 export declare class Decorator {
     target: any;
     key: string;
@@ -17,7 +18,9 @@ export declare type CheckType = {
 };
 export declare class CheckDecorator extends Decorator {
     check: CheckType;
-    constructor(target: any, key: string, check: CheckType);
+    failureMessage: string;
+    constructor(target: any, key: string, check: CheckType, failureMessage: string);
+    performCheck(bot: CommandClient, user: discord.User): boolean;
 }
 export declare class RestDecorator extends Decorator {
     index: number;
@@ -45,6 +48,6 @@ export declare function flag(target: any, key: string): void;
 export declare function rest(target: any, key: string, index: number): void;
 export declare function optional(target: any, key: string, index: number): void;
 export declare namespace checks {
-    function owner(target: any, key: string): void;
-    function check(checkFn: (user: discord.User) => boolean): (target: any, key: string) => void;
+    function isOwner(failureMessage?: string): (target: any, key: string) => void;
+    function check(checkFn: (user: discord.User) => boolean, failureMessage?: string): (target: any, key: string) => void;
 }
