@@ -15,7 +15,7 @@ export interface ClientOptions {
 export class CommandClient extends discord.Client {
     dispatcher: CommandDispatcher;
     commandManager: CommandManager;
-    options: Required<ClientOptions> & discord.ClientOptions;
+    options!: Required<ClientOptions> & discord.ClientOptions;
 
     constructor(options: ClientOptions & discord.ClientOptions = {}) {
         if (options.commandPrefix === undefined) { options.commandPrefix = "!"; }
@@ -24,7 +24,6 @@ export class CommandClient extends discord.Client {
         
         super(options);
 
-        this.options = options as Required<ClientOptions>;
         this.commandManager = new CommandManager();
         this.dispatcher = new CommandDispatcher(this.commandManager);
 

@@ -23,7 +23,6 @@ class CommandClient extends discord.Client {
             options.owner = "";
         }
         super(options);
-        this.options = options;
         this.commandManager = new command_manager_1.CommandManager();
         this.dispatcher = new dispatcher_1.CommandDispatcher(this.commandManager);
         this.on("message", msg => this.dispatcher.handleMessage(this, msg));

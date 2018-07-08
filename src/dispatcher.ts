@@ -2,7 +2,7 @@ import { CommandClient } from "./client";
 import { Message } from "discord.js";
 import { CommandManager } from "./command-manager";
 import * as discord from "discord.js";
-import { Context, Command } from "./command";
+import { Context, Command, Flags } from "./command";
 
 class InvalidArgumentException {
     constructor(public arg: string, public type: string) {
@@ -87,8 +87,8 @@ export class CommandDispatcher {
         if (!msg.content.startsWith(client.options.commandPrefix)) { return; }
         let content = msg.content.substring(client.options.commandPrefix.length);
 
-        const parts = parseCommand(content);
-        const commandName = parts[0];
+        let parts = parseCommand(content);
+        let commandName = parts[0];
 
         const rootCommand = this.commandManager.getRootCommand(commandName.text);
         if (rootCommand === undefined) {
@@ -97,6 +97,19 @@ export class CommandDispatcher {
             }
 
             return;
+        }
+
+        // strip flags
+        let flags: { [index: string]: any } = {};
+
+        for (let i = 0; i < parts.length; i++) {
+            let text = parts[i].text;
+
+            if (text.startsWith("--")) {
+                flags[text.substring(2)] = parts[i + 1];
+                parts = parts.slice(0, i).concat(parts.slice(i + 2));
+                i -= 1;
+            }
         }
 
         let argIdx = 1;
@@ -113,6 +126,8 @@ export class CommandDispatcher {
             let typedArgs = await Promise.all(params.map(async param => {
                 if (param.type === Context) {
                     return new Context(msg.channel as discord.TextChannel, msg, msg.author, msg.guild);
+                } else if (param.type === Flags) {
+                    return new Flags(flags);
                 }
 
                 // if we're out of text, and this is optional - return nothing

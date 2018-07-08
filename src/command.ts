@@ -48,6 +48,14 @@ export class Context {
     send = saveMessageProxy(this.channel, this.user, this.channel.send);
 }
 
+export class Flags<T> {
+    flag: { [P in keyof T]?: T[P] };
+
+    constructor(obj: Partial<T>) {
+        this.flag = Object.assign({}, obj);
+    }
+}
+
 export interface CommandOptions {
     /** Name of command - defaults to function name */
     name: string;
