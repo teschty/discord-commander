@@ -13,11 +13,7 @@ export declare class Context {
         (options?: discord.MessageAttachment | discord.MessageEmbed | discord.MessageOptions | undefined): Promise<discord.Message | discord.Message[]>;
     };
 }
-export declare class Flags<T> {
-    flag: {
-        [P in keyof T]?: T[P];
-    };
-    constructor(obj: Partial<T>);
+export declare class Flags {
 }
 export interface CommandOptions {
     /** Name of command - defaults to function name */

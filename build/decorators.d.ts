@@ -27,6 +27,9 @@ export declare class OptionalDecorator extends Decorator {
     index: number;
     constructor(target: any, key: string, index: number);
 }
+export declare class FlagDecorator extends Decorator {
+    constructor(target: any, key: string);
+}
 /**
  * Retrieves array of decorators for given `target` and `key`.
  * @param target Generally a class.
@@ -36,7 +39,9 @@ export declare function getDecorators(target: any, key: string): Decorator[];
 export declare function getDecoratorsByType<T extends Decorator>(target: any, key: string, type: {
     new (...args: any[]): T;
 }): T[];
+export declare function getDecoratorMapForClass(target: any): Map<string, Decorator[]> | undefined;
 export declare function command(options?: CommandOptions | string): (target: any, key: string) => void;
+export declare function flag(target: any, key: string): void;
 export declare function rest(target: any, key: string, index: number): void;
 export declare function optional(target: any, key: string, index: number): void;
 export declare namespace checks {

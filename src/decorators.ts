@@ -38,6 +38,12 @@ export class OptionalDecorator extends Decorator {
     }
 }
 
+export class FlagDecorator extends Decorator {
+    constructor(target: any, key: string) {
+        super(target, key);
+    }   
+}
+
 /**
  * Adds a decorator to the decorator map. 
  * @param decorator Decorator to add.
@@ -75,6 +81,10 @@ export function getDecoratorsByType<T extends Decorator>(target: any, key: strin
     return (keyMap.get(key) || []).filter((decorator): decorator is T => decorator instanceof type);
 }
 
+export function getDecoratorMapForClass(target: any) {
+    return decoratorMap.get(target);
+}
+
 export function command(options?: CommandOptions | string) {
     return (target: any, key: string) => {
         // if options not supplied
@@ -90,6 +100,10 @@ export function command(options?: CommandOptions | string) {
 
         addDecorator(new CommandDecorator(target, key, options));
     };
+}
+
+export function flag(target: any, key: string) {
+    addDecorator(new FlagDecorator(target, key));
 }
 
 export function rest(target: any, key: string, index: number) {

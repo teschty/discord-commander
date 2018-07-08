@@ -11,6 +11,7 @@ exports.command = decorators_1.command;
 exports.rest = decorators_1.rest;
 exports.optional = decorators_1.optional;
 exports.checks = decorators_1.checks;
+exports.flag = decorators_1.flag;
 var command_1 = require("./command");
 exports.Context = command_1.Context;
 exports.Flags = command_1.Flags;

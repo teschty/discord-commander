@@ -80,6 +80,10 @@ async function convertToType(client: CommandClient, guild: discord.Guild, item: 
 
 class TooFewArgumentsException { }
 
+class UnknownFlagException { 
+    constructor(public name: string) { }
+}
+
 export class CommandDispatcher {
     constructor(private commandManager: CommandManager) { }
 
@@ -112,6 +116,8 @@ export class CommandDispatcher {
                 } else {
                     flags[text.substring(2)] = true;
                 }
+
+                parts.splice(i, 1);
             }
         }
 
@@ -129,8 +135,23 @@ export class CommandDispatcher {
             let typedArgs = await Promise.all(params.map(async param => {
                 if (param.type === Context) {
                     return new Context(msg.channel as discord.TextChannel, msg, msg.author, msg.guild);
-                } else if (param.type === Flags) {
-                    return new Flags(flags);
+                } else if (param.type.prototype instanceof Flags) {
+                    let flagObject = new param.type();
+
+                    for (let key of Object.keys(flags)) {
+                        let type = Reflect.getMetadata("design:type", param.type.prototype, key);
+                        if (type === undefined) {
+                            throw new UnknownFlagException(key);
+                        }
+
+                        if (type !== Boolean) {
+                            flagObject[key] = await convertToType(client, msg.guild, flags[key], type);
+                        } else {
+                            flagObject[key] = true;
+                        }
+                    }
+
+                    return flagObject;
                 }
 
                 // if we're out of text, and this is optional - return nothing
@@ -140,7 +161,7 @@ export class CommandDispatcher {
                 }
 
                 return await convertToType(client, msg.guild, parts[argIdx++].text, param.type)
-            })).catch((err: TooFewArgumentsException | InvalidTypeException) => {
+            })).catch((err: TooFewArgumentsException | InvalidTypeException | UnknownFlagException) => {
                 return err;
             });
 
@@ -151,6 +172,9 @@ export class CommandDispatcher {
                 let expectedNumArgs = params.length - params.filter(p => p.optional).length;
                 await msg.channel.send(`Expected ${expectedNumArgs} argument(s), but got ${parts.length} argument(s)`);
                 return;
+            } else if (typedArgs instanceof UnknownFlagException) {
+                await msg.channel.send(`Command "${commandName.text}" has no flag "${typedArgs.name}"`);
+                return;
             }
 
             if (restIndex !== -1) {
@@ -158,7 +182,14 @@ export class CommandDispatcher {
                 typedArgs.push(content.substring(lastPart.index + lastPart.text.length + 1));
             }
 
-            rootCommand.method.call(rootCommand.gear, ...typedArgs as any[]);
+            let result = rootCommand.method.call(rootCommand.gear, ...typedArgs as any[]);
+            
+            // may not return a promise if command isn't async
+            if (result instanceof Promise) {
+                result.catch(async err => {
+                    await msg.channel.send("An error occurred while executing command: " + err);
+                });
+            }
         } else {
             // TODO: handle command groups
         }

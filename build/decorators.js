@@ -36,6 +36,12 @@ class OptionalDecorator extends Decorator {
     }
 }
 exports.OptionalDecorator = OptionalDecorator;
+class FlagDecorator extends Decorator {
+    constructor(target, key) {
+        super(target, key);
+    }
+}
+exports.FlagDecorator = FlagDecorator;
 /**
  * Adds a decorator to the decorator map.
  * @param decorator Decorator to add.
@@ -72,6 +78,10 @@ function getDecoratorsByType(target, key, type) {
     return (keyMap.get(key) || []).filter((decorator) => decorator instanceof type);
 }
 exports.getDecoratorsByType = getDecoratorsByType;
+function getDecoratorMapForClass(target) {
+    return decoratorMap.get(target);
+}
+exports.getDecoratorMapForClass = getDecoratorMapForClass;
 function command(options) {
     return (target, key) => {
         // if options not supplied
@@ -87,6 +97,10 @@ function command(options) {
     };
 }
 exports.command = command;
+function flag(target, key) {
+    addDecorator(new FlagDecorator(target, key));
+}
+exports.flag = flag;
 function rest(target, key, index) {
     addDecorator(new RestDecorator(target, key, index));
 }

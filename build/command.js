@@ -40,9 +40,6 @@ class Context {
 }
 exports.Context = Context;
 class Flags {
-    constructor(obj) {
-        this.flag = Object.assign({}, obj);
-    }
 }
 exports.Flags = Flags;
 class Command {
