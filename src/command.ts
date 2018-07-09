@@ -89,7 +89,7 @@ export class Command {
     public getHelpText() {
         let flagsClass: any;
 
-        let text = this.method.name + this.params.map(param => {
+        let text = this.name + " " + this.params.map(param => {
             if (param.type === Context) {
                 return "";
             } else if (param.type.prototype instanceof Flags) {
@@ -98,11 +98,11 @@ export class Command {
             }
 
             if (param.optional) {
-                return `[${param.name}]: ${param.type.toString()}`;
+                return `[${param.name}: ${param.type.name}]`;
             } else if (param.rest) {
-                return `${param.name}: ${param.type}...`;
+                return `${param.name}: ${param.type.name}...`;
             } else {
-                return `${param.name}: ${param.type}`;
+                return `${param.name}: ${param.type.name}`;
             }
         })
         .filter(t => t)
