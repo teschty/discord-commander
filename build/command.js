@@ -59,7 +59,7 @@ class Command {
     }
     getHelpText() {
         let flagsClass;
-        let text = this.method.name + this.params.map(param => {
+        let text = this.name + " " + this.params.map(param => {
             if (param.type === Context) {
                 return "";
             }
@@ -68,13 +68,13 @@ class Command {
                 return "";
             }
             if (param.optional) {
-                return `[${param.name}]: ${param.type.toString()}`;
+                return `[${param.name}: ${param.type.name}]`;
             }
             else if (param.rest) {
-                return `${param.name}: ${param.type}...`;
+                return `${param.name}: ${param.type.name}...`;
             }
             else {
-                return `${param.name}: ${param.type}`;
+                return `${param.name}: ${param.type.name}`;
             }
         })
             .filter(t => t)
