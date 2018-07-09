@@ -97,14 +97,14 @@ class Command {
                 return `[${param.name}: ${typeName}]`;
             }
             else if (param.rest) {
-                return `${param.name}: ${typeName}...`;
+                return `(${param.name}: ${typeName})...)`;
             }
             else {
-                return `${param.name}: ${typeName}`;
+                return `(${param.name}: ${typeName})`;
             }
         })
             .filter(t => t)
-            .join(", ");
+            .join(" ");
         return text;
     }
 }

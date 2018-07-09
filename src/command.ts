@@ -114,7 +114,7 @@ export class Command {
 
         let text = this.name + " " + this.params.map(param => {
             if (param.type === Context) {
-                return "";
+                return ""
             } else if (param.type.prototype instanceof Flags) {
                 flagsClass = param.type;
                 return "";
@@ -124,13 +124,13 @@ export class Command {
             if (param.optional) {
                 return `[${param.name}: ${typeName}]`;
             } else if (param.rest) {
-                return `${param.name}: ${typeName}...`;
+                return `(${param.name}: ${typeName})...)`;
             } else {
-                return `${param.name}: ${typeName}`;
+                return `(${param.name}: ${typeName})`;
             }
         })
         .filter(t => t)
-        .join(", ");
+        .join(" ");
 
         return text;
     }
