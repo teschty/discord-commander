@@ -124,7 +124,7 @@ export class Command {
             if (param.optional) {
                 return `[${param.name}: ${typeName}]`;
             } else if (param.rest) {
-                return `(${param.name}: ${typeName})...)`;
+                return `(${param.name}: ${typeName}...)`;
             } else {
                 return `(${param.name}: ${typeName})`;
             }
