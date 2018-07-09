@@ -26,6 +26,8 @@ export interface CommandOptions {
 export interface CommandParameter {
     /** Type of parameter, string, number, etc... */
     type: any;
+    /** Name of parameter */
+    name: string;
     /** If set, remainder of given arguments are joined into a single string */
     rest: boolean;
     /** If set, parameter is not required */
@@ -39,6 +41,7 @@ export declare class Command {
     checks: CheckDecorator[];
     constructor(name: string, method: Function, params: CommandParameter[], gear: any, checks: CheckDecorator[]);
     performChecks(bot: CommandClient, user: discord.User): Error | undefined;
+    getHelpText(): string;
 }
 export declare class CommandGroup {
     name: string;

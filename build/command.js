@@ -57,6 +57,30 @@ class Command {
             }
         }
     }
+    getHelpText() {
+        let flagsClass;
+        let text = this.method.name + this.params.map(param => {
+            if (param.type === Context) {
+                return "";
+            }
+            else if (param.type.prototype instanceof Flags) {
+                flagsClass = param.type;
+                return "";
+            }
+            if (param.optional) {
+                return `[${param.name}]: ${param.type.toString()}`;
+            }
+            else if (param.rest) {
+                return `${param.name}: ${param.type}...`;
+            }
+            else {
+                return `${param.name}: ${param.type}`;
+            }
+        })
+            .filter(t => t)
+            .join(", ");
+        return text;
+    }
 }
 exports.Command = Command;
 class CommandGroup {

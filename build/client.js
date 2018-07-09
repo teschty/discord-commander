@@ -33,6 +33,13 @@ class CommandClient extends discord.Client {
     deleteLastResponsesToUser(user, numberToDelete) {
         return command.deleteLastResponsesToUser(user, numberToDelete);
     }
+    getHelpText(commandName) {
+        let cmd = this.commandManager.getRootCommand(commandName);
+        if (cmd instanceof command.Command) {
+            return cmd.getHelpText();
+        }
+        return "";
+    }
     addGear(gear) {
         this.commandManager.addGear(gear);
     }

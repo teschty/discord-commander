@@ -2,6 +2,18 @@ import { getDecoratorsByType, CommandDecorator } from "./decorators";
 import * as decorators from "./decorators";
 import { Command, CommandGroup } from "./command";
 
+const STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
+const ARGUMENT_NAMES = /([^\s,]+)/g;
+
+function getParamNames(func: Function) {
+    let fnStr = func.toString().replace(STRIP_COMMENTS, '');
+    let result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+    if (result === null)
+        result = [];
+
+    return result;
+}
+
 export class CommandManager {
     commands: Map<string, Command | CommandGroup> = new Map();
 
@@ -12,9 +24,12 @@ export class CommandManager {
         const restDecorators = getDecoratorsByType(cls, methodName, decorators.RestDecorator);
         const optionalDecorators = getDecoratorsByType(cls, methodName, decorators.OptionalDecorator);
 
+        const paramNames = getParamNames(cls[methodName]);
         const paramTypes: any[] = Reflect.getMetadata("design:paramtypes", cls, methodName);
+
         const params = paramTypes.map((type, i) => ({
             type,
+            name: paramNames[i],
             rest: restDecorators.some(dec => dec.index === i),
             optional: optionalDecorators.some(dec => dec.index === i)
         }));

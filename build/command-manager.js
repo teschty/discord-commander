@@ -10,6 +10,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const decorators_1 = require("./decorators");
 const decorators = __importStar(require("./decorators"));
 const command_1 = require("./command");
+const STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
+const ARGUMENT_NAMES = /([^\s,]+)/g;
+function getParamNames(func) {
+    let fnStr = func.toString().replace(STRIP_COMMENTS, '');
+    let result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+    if (result === null)
+        result = [];
+    return result;
+}
 class CommandManager {
     constructor() {
         this.commands = new Map();
@@ -19,9 +28,11 @@ class CommandManager {
         let checkDecorators = decorators_1.getDecoratorsByType(cls, methodName, decorators.CheckDecorator);
         const restDecorators = decorators_1.getDecoratorsByType(cls, methodName, decorators.RestDecorator);
         const optionalDecorators = decorators_1.getDecoratorsByType(cls, methodName, decorators.OptionalDecorator);
+        const paramNames = getParamNames(cls[methodName]);
         const paramTypes = Reflect.getMetadata("design:paramtypes", cls, methodName);
         const params = paramTypes.map((type, i) => ({
             type,
+            name: paramNames[i],
             rest: restDecorators.some(dec => dec.index === i),
             optional: optionalDecorators.some(dec => dec.index === i)
         }));

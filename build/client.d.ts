@@ -16,5 +16,6 @@ export declare class CommandClient extends discord.Client {
     constructor(options?: ClientOptions & discord.ClientOptions);
     getLastResponsesToUser(user: discord.User): discord.Message[];
     deleteLastResponsesToUser(user: discord.User, numberToDelete: number): Promise<void>;
+    getHelpText(commandName: string): string;
     addGear(gear: any): void;
 }

@@ -1,5 +1,5 @@
 import * as discord from "discord.js";
-import { CheckDecorator } from "./decorators";
+import { CheckDecorator, getDecoratorsByType } from "./decorators";
 import { CommandClient } from "./client";
 
 let lastResponsesByUser: { [id: string]: discord.Message[] } = {};
@@ -14,7 +14,7 @@ function saveMessageProxy<T>(channel: discord.TextChannel, user: discord.User, f
             if (lastResponses.length > 5) {
                 lastResponses = lastResponses.slice(lastResponses.length - 5);
             }
-            
+
             lastResponsesByUser[user.id] = lastResponses;
 
             return msg;
@@ -42,10 +42,10 @@ export type CommandMap = Map<string, Command>;
 
 // Has to be class, otherwise reflection can't see it
 export class Context {
-    constructor(public channel: discord.TextChannel, 
-                public message: discord.Message, 
-                public user: discord.User,
-                public guild?: discord.Guild) {}
+    constructor(public channel: discord.TextChannel,
+        public message: discord.Message,
+        public user: discord.User,
+        public guild?: discord.Guild) { }
 
     send = saveMessageProxy(this.channel, this.user, this.channel.send);
 }
@@ -62,6 +62,8 @@ export interface CommandOptions {
 export interface CommandParameter {
     /** Type of parameter, string, number, etc... */
     type: any;
+    /** Name of parameter */
+    name: string;
     /** If set, remainder of given arguments are joined into a single string */
     rest: boolean;
     /** If set, parameter is not required */
@@ -69,12 +71,12 @@ export interface CommandParameter {
 }
 
 export class Command {
-    constructor(public name: string, 
-                public method: Function,
-                public params: CommandParameter[],
-                public gear: any,
-                public checks: CheckDecorator[]
-            ) { }
+    constructor(public name: string,
+        public method: Function,
+        public params: CommandParameter[],
+        public gear: any,
+        public checks: CheckDecorator[]
+    ) { }
 
     performChecks(bot: CommandClient, user: discord.User) {
         for (let check of this.checks) {
@@ -83,10 +85,35 @@ export class Command {
             }
         }
     }
+
+    public getHelpText() {
+        let flagsClass: any;
+
+        let text = this.method.name + this.params.map(param => {
+            if (param.type === Context) {
+                return "";
+            } else if (param.type.prototype instanceof Flags) {
+                flagsClass = param.type;
+                return "";
+            }
+
+            if (param.optional) {
+                return `[${param.name}]: ${param.type.toString()}`;
+            } else if (param.rest) {
+                return `${param.name}: ${param.type}...`;
+            } else {
+                return `${param.name}: ${param.type}`;
+            }
+        })
+        .filter(t => t)
+        .join(", ");
+
+        return text;
+    }
 }
 
 export class CommandGroup {
     constructor(public name: string,
-                public subCommands: CommandMap,
-                public gear: any) { }
+        public subCommands: CommandMap,
+        public gear: any) { }
 }
