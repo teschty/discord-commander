@@ -1,5 +1,13 @@
 "use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const discord = __importStar(require("discord.js"));
 let lastResponsesByUser = {};
 function saveMessageProxy(channel, user, func) {
     return ((...args) => {
@@ -57,6 +65,23 @@ class Command {
             }
         }
     }
+    getTypeName(type) {
+        switch (type) {
+            case String:
+                return "string";
+            case Number:
+                return "number";
+            case Boolean:
+                return "bool";
+            case discord.GuildMember:
+            case discord.User:
+                return "user";
+            case discord.Guild:
+                return "guild";
+            default:
+                return type.name;
+        }
+    }
     getHelpText() {
         let flagsClass;
         let text = this.name + " " + this.params.map(param => {
@@ -67,14 +92,15 @@ class Command {
                 flagsClass = param.type;
                 return "";
             }
+            let typeName = this.getTypeName(param.type);
             if (param.optional) {
-                return `[${param.name}: ${param.type.name}]`;
+                return `[${param.name}: ${typeName}]`;
             }
             else if (param.rest) {
-                return `${param.name}: ${param.type.name}...`;
+                return `${param.name}: ${typeName}...`;
             }
             else {
-                return `${param.name}: ${param.type.name}`;
+                return `${param.name}: ${typeName}`;
             }
         })
             .filter(t => t)

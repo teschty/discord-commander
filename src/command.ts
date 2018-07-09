@@ -86,6 +86,29 @@ export class Command {
         }
     }
 
+    getTypeName(type: any) {
+        switch (type) {
+            case String:
+                return "string";
+
+            case Number:
+                return "number";
+
+            case Boolean:
+                return "bool";
+                
+            case discord.GuildMember:
+            case discord.User:
+                return "user";
+
+            case discord.Guild:
+                return "guild";
+
+            default:
+                return type.name;
+        }
+    }
+
     public getHelpText() {
         let flagsClass: any;
 
@@ -97,12 +120,13 @@ export class Command {
                 return "";
             }
 
+            let typeName = this.getTypeName(param.type);
             if (param.optional) {
-                return `[${param.name}: ${param.type.name}]`;
+                return `[${param.name}: ${typeName}]`;
             } else if (param.rest) {
-                return `${param.name}: ${param.type.name}...`;
+                return `${param.name}: ${typeName}...`;
             } else {
-                return `${param.name}: ${param.type.name}`;
+                return `${param.name}: ${typeName}`;
             }
         })
         .filter(t => t)

@@ -41,6 +41,7 @@ export declare class Command {
     checks: CheckDecorator[];
     constructor(name: string, method: Function, params: CommandParameter[], gear: any, checks: CheckDecorator[]);
     performChecks(bot: CommandClient, user: discord.User): Error | undefined;
+    getTypeName(type: any): any;
     getHelpText(): string;
 }
 export declare class CommandGroup {
