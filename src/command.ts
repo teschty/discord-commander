@@ -1,5 +1,5 @@
 import * as discord from "discord.js";
-import { CheckDecorator, getDecoratorsByType } from "./decorators";
+import { CheckDecorator, getDecoratorsByType, getDecoratorMapForClass } from "./decorators";
 import { CommandClient } from "./client";
 
 let lastResponsesByUser: { [id: string]: discord.Message[] } = {};
@@ -131,6 +131,19 @@ export class Command {
         })
         .filter(t => t)
         .join(" ");
+
+        if (flagsClass) {
+            let decorators = getDecoratorMapForClass(flagsClass.prototype);
+
+            if (decorators) {
+                text += " " + Array.from(decorators.entries()).map(entry => {
+                    let [name] = entry;
+                    let type = Reflect.getMetadata("design:type", flagsClass.prototype, name);
+
+                    return `--${name}=${this.getTypeName(type)}`;
+                }).join(" ");
+            }
+        }
 
         return text;
     }

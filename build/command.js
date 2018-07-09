@@ -8,6 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const discord = __importStar(require("discord.js"));
+const decorators_1 = require("./decorators");
 let lastResponsesByUser = {};
 function saveMessageProxy(channel, user, func) {
     return ((...args) => {
@@ -105,6 +106,16 @@ class Command {
         })
             .filter(t => t)
             .join(" ");
+        if (flagsClass) {
+            let decorators = decorators_1.getDecoratorMapForClass(flagsClass.prototype);
+            if (decorators) {
+                text += " " + Array.from(decorators.entries()).map(entry => {
+                    let [name] = entry;
+                    let type = Reflect.getMetadata("design:type", flagsClass.prototype, name);
+                    return `--${name}=${this.getTypeName(type)}`;
+                }).join(" ");
+            }
+        }
         return text;
     }
 }

@@ -13,11 +13,13 @@ const command_1 = require("./command");
 const STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
 const ARGUMENT_NAMES = /([^\s,]+)/g;
 function getParamNames(func) {
-    let fnStr = func.toString().replace(STRIP_COMMENTS, '');
-    let result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
-    if (result === null)
-        result = [];
-    return result;
+    return (func + '')
+        .replace(/[/][/].*$/mg, '') // strip single-line comments
+        .replace(/\s+/g, '') // strip white space
+        .replace(/[/][*][^/*]*[*][/]/g, '') // strip multi-line comments  
+        .split('){', 1)[0].replace(/^[^(]*[(]/, '') // extract the parameters  
+        .replace(/=[^,]+/g, '') // strip any ES6 defaults  
+        .split(',').filter(Boolean); // split & filter [""]
 }
 class CommandManager {
     constructor() {
