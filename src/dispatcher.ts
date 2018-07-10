@@ -144,7 +144,9 @@ export class CommandDispatcher {
 
         let argIdx = 1;
         if (rootCommand instanceof Command) {
-            let checkResult = rootCommand.performChecks(client, msg.author);
+            let ctx = new Context(msg.channel as discord.TextChannel, msg, msg.author, msg.guild);
+
+            let checkResult = rootCommand.performChecks(client, ctx);
             if (checkResult instanceof Error) {
                 return await msg.channel.send(checkResult.message);
             }
@@ -160,7 +162,7 @@ export class CommandDispatcher {
 
             let typedArgs = await Promise.all(params.map(async param => {
                 if (param.type === Context) {
-                    return new Context(msg.channel as discord.TextChannel, msg, msg.author, msg.guild);
+                    return ctx;
                 } else if (param.type.prototype instanceof Flags) {
                     let flagObject = new param.type();
 

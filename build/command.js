@@ -59,9 +59,9 @@ class Command {
         this.gear = gear;
         this.checks = checks;
     }
-    performChecks(bot, user) {
+    performChecks(bot, ctx) {
         for (let check of this.checks) {
-            if (!check.performCheck(bot, user)) {
+            if (!check.performCheck(bot, ctx)) {
                 return new Error(check.failureMessage);
             }
         }

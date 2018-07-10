@@ -1,5 +1,4 @@
-import * as discord from "discord.js";
-import { CommandOptions } from "./command";
+import { CommandOptions, Context } from "./command";
 import { CommandClient } from "./client";
 export declare class Decorator {
     target: any;
@@ -14,13 +13,13 @@ export declare type CheckType = {
     type: "owner";
 } | {
     type: "custom";
-    checkFn: (user: discord.User) => boolean;
+    checkFn: (user: Context) => boolean;
 };
 export declare class CheckDecorator extends Decorator {
     check: CheckType;
     failureMessage: string;
     constructor(target: any, key: string, check: CheckType, failureMessage: string);
-    performCheck(bot: CommandClient, user: discord.User): boolean;
+    performCheck(bot: CommandClient, ctx: Context): boolean;
 }
 export declare class RestDecorator extends Decorator {
     index: number;
@@ -49,5 +48,5 @@ export declare function rest(target: any, key: string, index: number): void;
 export declare function optional(target: any, key: string, index: number): void;
 export declare namespace checks {
     function isOwner(failureMessage?: string): (target: any, key: string) => void;
-    function check(checkFn: (user: discord.User) => boolean, failureMessage?: string): (target: any, key: string) => void;
+    function check(checkFn: (ctx: Context) => boolean, failureMessage?: string): (target: any, key: string) => void;
 }

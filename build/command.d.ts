@@ -40,7 +40,7 @@ export declare class Command {
     gear: any;
     checks: CheckDecorator[];
     constructor(name: string, method: Function, params: CommandParameter[], gear: any, checks: CheckDecorator[]);
-    performChecks(bot: CommandClient, user: discord.User): Error | undefined;
+    performChecks(bot: CommandClient, ctx: Context): Error | undefined;
     getTypeName(type: any): any;
     getHelpText(): string;
 }

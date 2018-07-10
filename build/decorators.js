@@ -21,12 +21,12 @@ class CheckDecorator extends Decorator {
         this.check = check;
         this.failureMessage = failureMessage;
     }
-    performCheck(bot, user) {
+    performCheck(bot, ctx) {
         if (this.check.type === "owner") {
-            return bot.options.owners.includes(user.id);
+            return bot.options.owners.includes(ctx.user.id);
         }
         else {
-            return this.check.checkFn(user);
+            return this.check.checkFn(ctx);
         }
     }
 }

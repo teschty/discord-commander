@@ -135,7 +135,8 @@ class CommandDispatcher {
         }
         let argIdx = 1;
         if (rootCommand instanceof command_1.Command) {
-            let checkResult = rootCommand.performChecks(client, msg.author);
+            let ctx = new command_1.Context(msg.channel, msg, msg.author, msg.guild);
+            let checkResult = rootCommand.performChecks(client, ctx);
             if (checkResult instanceof Error) {
                 return await msg.channel.send(checkResult.message);
             }
@@ -148,7 +149,7 @@ class CommandDispatcher {
             }
             let typedArgs = await Promise.all(params.map(async (param) => {
                 if (param.type === command_1.Context) {
-                    return new command_1.Context(msg.channel, msg, msg.author, msg.guild);
+                    return ctx;
                 }
                 else if (param.type.prototype instanceof command_1.Flags) {
                     let flagObject = new param.type();

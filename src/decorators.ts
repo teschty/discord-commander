@@ -1,5 +1,5 @@
 import * as discord from "discord.js";
-import { CommandOptions } from "./command";
+import { CommandOptions, Context } from "./command";
 import { CommandClient } from "./client";
 import { fail } from "assert";
 
@@ -19,7 +19,7 @@ export class CommandDecorator extends Decorator {
 
 export type CheckType = { type: "owner" } | {
     type: "custom",
-    checkFn: (user: discord.User) => boolean;
+    checkFn: (user: Context) => boolean;
 };
 
 export class CheckDecorator extends Decorator {
@@ -27,11 +27,11 @@ export class CheckDecorator extends Decorator {
         super(target, key);
     }
 
-    performCheck(bot: CommandClient, user: discord.User) {
+    performCheck(bot: CommandClient, ctx: Context) {
         if (this.check.type === "owner") {
-            return bot.options.owners.includes(user.id);
+            return bot.options.owners.includes(ctx.user.id);
         } else {
-            return this.check.checkFn(user);
+            return this.check.checkFn(ctx);
         }
     }
 }
@@ -132,7 +132,7 @@ export namespace checks {
         };
     }
 
-    export function check(checkFn: (user: discord.User) => boolean, failureMessage?: string) {
+    export function check(checkFn: (ctx: Context) => boolean, failureMessage?: string) {
         return (target: any, key: string) => {
             failureMessage = failureMessage || "You lack sufficient permissions to perform that action.";
 

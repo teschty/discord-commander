@@ -78,9 +78,9 @@ export class Command {
         public checks: CheckDecorator[]
     ) { }
 
-    performChecks(bot: CommandClient, user: discord.User) {
+    performChecks(bot: CommandClient, ctx: Context) {
         for (let check of this.checks) {
-            if (!check.performCheck(bot, user)) {
+            if (!check.performCheck(bot, ctx)) {
                 return new Error(check.failureMessage);
             }
         }
