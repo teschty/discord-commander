@@ -33,6 +33,12 @@ class InvalidTypeException {
     constructor(public expectedType: string, public provided: string) { }
 }
 
+class TooFewArgumentsException { }
+
+class UnknownFlagException { 
+    constructor(public name: string) { }
+}
+
 /** Attempts to convert string values to specified type */
 async function convertToType(client: CommandClient, guild: discord.Guild, item: string, type: any) {
     try {
@@ -95,12 +101,6 @@ async function convertToType(client: CommandClient, guild: discord.Guild, item: 
             throw new InvalidTypeException(type.toString(), item);
         }
     }
-}
-
-class TooFewArgumentsException { }
-
-class UnknownFlagException { 
-    constructor(public name: string) { }
 }
 
 export class CommandDispatcher {

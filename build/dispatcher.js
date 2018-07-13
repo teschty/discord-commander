@@ -36,6 +36,13 @@ class InvalidTypeException {
         this.provided = provided;
     }
 }
+class TooFewArgumentsException {
+}
+class UnknownFlagException {
+    constructor(name) {
+        this.name = name;
+    }
+}
 /** Attempts to convert string values to specified type */
 async function convertToType(client, guild, item, type) {
     try {
@@ -89,13 +96,6 @@ async function convertToType(client, guild, item, type) {
         else {
             throw new InvalidTypeException(type.toString(), item);
         }
-    }
-}
-class TooFewArgumentsException {
-}
-class UnknownFlagException {
-    constructor(name) {
-        this.name = name;
     }
 }
 class CommandDispatcher {
