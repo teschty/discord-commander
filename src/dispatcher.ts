@@ -69,6 +69,9 @@ async function convertToType(client: CommandClient, guild: discord.Guild, item: 
                         throw new InvalidArgumentException(item, "boolean");
                 }
             
+            case discord.Guild:
+                return client.guilds.get(item);
+
             case discord.User:
                 // if mention, message will be <@id>
                 if (item.startsWith("<")) {
