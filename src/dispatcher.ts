@@ -3,7 +3,6 @@ import { Message } from "discord.js";
 import { CommandManager } from "./command-manager";
 import * as discord from "discord.js";
 import { Context, Command, Flags } from "./command";
-import { INSPECT_MAX_BYTES } from "buffer";
 
 class InvalidArgumentException {
     constructor(public arg: string, public type: string) {
