@@ -77,7 +77,9 @@ async function convertToType(client: CommandClient, guild: discord.Guild, item: 
                     item = item.substring(2, item.length - 1);
                 }
 
-                return client.users.fetch(item);
+                return client.users.fetch(item).catch(err => {
+                    console.log("Couldn't resolve " + item + " to user. Error: " + err);
+                });
 
             case discord.GuildMember:
                 // if mention, message will be <@id>
@@ -85,7 +87,9 @@ async function convertToType(client: CommandClient, guild: discord.Guild, item: 
                     item = item.substring(2, item.length - 1);
                 }
 
-                return guild.members.fetch(item);
+                return guild.members.fetch(item).catch(err => {
+                    console.log("Couldn't resolve " + item + " to user. Error: " + err);
+                });
 
             case Object:
             case String:
