@@ -68,6 +68,11 @@ async function convertToType(client, guild, item, type) {
                     default:
                         throw new InvalidArgumentException(item, "boolean");
                 }
+            case discord.Channel:
+            case discord.TextChannel:
+            case discord.GuildChannel:
+            case discord.VoiceChannel:
+                return client.channels.get(item);
             case discord.Guild:
                 return client.guilds.get(item);
             case discord.User:
@@ -75,13 +80,17 @@ async function convertToType(client, guild, item, type) {
                 if (item.startsWith("<")) {
                     item = item.substring(2, item.length - 1);
                 }
-                return client.users.fetch(item);
+                return client.users.fetch(item).catch(err => {
+                    console.log("Couldn't resolve " + item + " to user. Error: " + err);
+                });
             case discord.GuildMember:
                 // if mention, message will be <@id>
                 if (item.startsWith("<")) {
                     item = item.substring(2, item.length - 1);
                 }
-                return guild.members.fetch(item);
+                return guild.members.fetch(item).catch(err => {
+                    console.log("Couldn't resolve " + item + " to user. Error: " + err);
+                });
             case Object:
             case String:
                 return item;
