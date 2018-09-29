@@ -67,6 +67,12 @@ async function convertToType(client: CommandClient, guild: discord.Guild, item: 
                     default:
                         throw new InvalidArgumentException(item, "boolean");
                 }
+
+            case discord.Channel:
+            case discord.TextChannel:
+            case discord.GuildChannel:
+            case discord.VoiceChannel:
+                return client.channels.get(item);
             
             case discord.Guild:
                 return client.guilds.get(item);
