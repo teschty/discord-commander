@@ -22,8 +22,9 @@
   },
   "homepage": "https://github.com/teschty/discord-commander#readme",
   "dependencies": {
-    "@types/node": "^9.6.6",
-    "discord.js": "git+https://git@github.com/discordjs/discord.js.git#75ebd5d23cf33ea5da6538a1a4865bea2c58e3d5",
+    "@types/node": "^13.11.1",
+    "@types/ws": "^7.2.4",
+    "discord.js": "^12.1.1",
     "node-opus": "^0.3.0",
     "reflect-metadata": "^0.1.12"
   },

@@ -72,10 +72,10 @@ async function convertToType(client: CommandClient, guild: discord.Guild, item: 
             case discord.TextChannel:
             case discord.GuildChannel:
             case discord.VoiceChannel:
-                return client.channels.get(item);
+                return await client.channels.fetch(item);
             
             case discord.Guild:
-                return client.guilds.get(item);
+                return client.guilds.resolve(item);
 
             case discord.User:
                 // if mention, message will be <@id>
@@ -156,7 +156,7 @@ export class CommandDispatcher {
 
         let argIdx = 1;
         if (rootCommand instanceof Command) {
-            let ctx = new Context(msg.channel as discord.TextChannel, msg, msg.author, msg.guild);
+            let ctx = new Context(msg.channel as discord.TextChannel, msg, msg.author, msg.guild!);
 
             let checkResult = rootCommand.performChecks(client, ctx);
             if (checkResult instanceof Error) {
@@ -184,7 +184,7 @@ export class CommandDispatcher {
                             throw new UnknownFlagException(key);
                         }
 
-                        flagObject[key] = await convertToType(client, msg.guild, flags[key], type);
+                        flagObject[key] = await convertToType(client, msg.guild!, flags[key], type);
                     }
 
                     return flagObject;
@@ -196,7 +196,7 @@ export class CommandDispatcher {
                     throw new TooFewArgumentsException();
                 }
 
-                return await convertToType(client, msg.guild, parts[argIdx++].text, param.type)
+                return await convertToType(client, msg.guild!, parts[argIdx++].text, param.type)
             })).catch((err: TooFewArgumentsException | InvalidTypeException | UnknownFlagException) => {
                 return err;
             });

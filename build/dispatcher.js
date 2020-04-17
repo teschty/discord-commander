@@ -72,9 +72,9 @@ async function convertToType(client, guild, item, type) {
             case discord.TextChannel:
             case discord.GuildChannel:
             case discord.VoiceChannel:
-                return client.channels.get(item);
+                return await client.channels.fetch(item);
             case discord.Guild:
-                return client.guilds.get(item);
+                return client.guilds.resolve(item);
             case discord.User:
                 // if mention, message will be <@id>
                 if (item.startsWith("<")) {

@@ -11,8 +11,19 @@ export declare class Context {
     guild?: discord.Guild | undefined;
     constructor(channel: discord.TextChannel, message: discord.Message, user: discord.User, guild?: discord.Guild | undefined);
     send: {
-        (content?: any, options?: discord.MessageAttachment | discord.MessageEmbed | discord.MessageOptions | undefined): Promise<discord.Message | discord.Message[]>;
-        (options?: discord.MessageAttachment | discord.MessageEmbed | discord.MessageOptions | undefined): Promise<discord.Message | discord.Message[]>;
+        (options: discord.APIMessage | discord.MessageOptions | discord.MessageEmbed | discord.MessageAttachment | (discord.MessageEmbed | discord.MessageAttachment)[] | (discord.MessageOptions & {
+            split?: false | undefined;
+        })): Promise<discord.Message>;
+        (options: discord.APIMessage | (discord.MessageOptions & {
+            split: true | discord.SplitOptions;
+            content: any;
+        })): Promise<discord.Message[]>;
+        (content: any, options?: discord.MessageOptions | discord.MessageEmbed | discord.MessageAttachment | (discord.MessageEmbed | discord.MessageAttachment)[] | (discord.MessageOptions & {
+            split?: false | undefined;
+        }) | undefined): Promise<discord.Message>;
+        (content: any, options?: (discord.MessageOptions & {
+            split: true | discord.SplitOptions;
+        }) | undefined): Promise<discord.Message[]>;
     };
 }
 export declare class Flags {

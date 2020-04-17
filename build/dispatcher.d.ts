@@ -4,5 +4,5 @@ import { CommandManager } from "./command-manager";
 export declare class CommandDispatcher {
     private commandManager;
     constructor(commandManager: CommandManager);
-    handleMessage(client: CommandClient, msg: Message): Promise<Message | Message[] | undefined>;
+    handleMessage(client: CommandClient, msg: Message): Promise<Message | undefined>;
 }
